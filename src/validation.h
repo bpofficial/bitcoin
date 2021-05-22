@@ -20,14 +20,14 @@
 #include <policy/feerate.h>
 #include <protocol.h> // For CMessageHeader::MessageStartChars
 #include <script/script_error.h>
-#include <sync.h>
-#include <txmempool.h> // For CTxMemPool::cs
-#include <txdb.h>
-#include <versionbits.h>
 #include <serialize.h>
+#include <sync.h>
+#include <txdb.h>
+#include <txmempool.h> // For CTxMemPool::cs
 #include <util/check.h>
 #include <util/hasher.h>
 #include <util/translation.h>
+#include <versionbits.h>
 
 #include <atomic>
 #include <map>
@@ -76,7 +76,7 @@ static const int MAX_SCRIPTCHECK_THREADS = 15;
 /** -par default (number of script-checking threads, 0 = auto) */
 static const int DEFAULT_SCRIPTCHECK_THREADS = 0;
 static const int64_t DEFAULT_MAX_TIP_AGE = 24 * 60 * 60;
-static const bool DEFAULT_CHECKPOINTS_ENABLED = true;
+static const bool DEFAULT_CHECKPOINTS_ENABLED = false;
 static const bool DEFAULT_TXINDEX = false;
 static constexpr bool DEFAULT_COINSTATSINDEX{false};
 static const char* const DEFAULT_BLOCKFILTERINDEX = "0";
@@ -131,7 +131,7 @@ extern uint256 hashAssumeValid;
 extern arith_uint256 nMinimumChainWork;
 
 /** Best header we've seen so far (used for getheaders queries' starting points). */
-extern CBlockIndex *pindexBestHeader;
+extern CBlockIndex* pindexBestHeader;
 
 /** Documentation for argument 'checklevel'. */
 extern const std::vector<std::string> CHECKLEVEL_DOC;
@@ -173,7 +173,7 @@ struct MempoolAcceptResult {
     * including the possibility of unfinished validation.
     */
     enum class ResultType {
-        VALID, //!> Fully validated, valid.
+        VALID,   //!> Fully validated, valid.
         INVALID, //!> Invalid.
     };
     const ResultType m_result_type;
@@ -187,14 +187,15 @@ struct MempoolAcceptResult {
 
     /** Constructor for failure case */
     explicit MempoolAcceptResult(TxValidationState state)
-        : m_result_type(ResultType::INVALID), m_state(state) {
-            Assume(!state.IsValid()); // Can be invalid or error
-        }
+        : m_result_type(ResultType::INVALID), m_state(state)
+    {
+        Assume(!state.IsValid()); // Can be invalid or error
+    }
 
     /** Constructor for success case */
     explicit MempoolAcceptResult(std::list<CTransactionRef>&& replaced_txns, CAmount fees)
         : m_result_type(ResultType::VALID),
-        m_replaced_transactions(std::move(replaced_txns)), m_base_fees(fees) {}
+          m_replaced_transactions(std::move(replaced_txns)), m_base_fees(fees) {}
 };
 
 /**
@@ -203,7 +204,7 @@ struct MempoolAcceptResult {
  * @param[in]  test_accept     When true, run validation checks but don't submit to mempool.
  */
 MempoolAcceptResult AcceptToMemoryPool(CChainState& active_chainstate, CTxMemPool& pool, const CTransactionRef& tx,
-                                       bool bypass_limits, bool test_accept=false) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+                                       bool bypass_limits, bool test_accept = false) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 
 /** Apply the effects of this transaction on the UTXO set represented by view */
@@ -218,7 +219,7 @@ void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
  *
  * See consensus/consensus.h for flag definitions.
  */
-bool CheckFinalTx(const CBlockIndex* active_chain_tip, const CTransaction &tx, int flags = -1) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+bool CheckFinalTx(const CBlockIndex* active_chain_tip, const CTransaction& tx, int flags = -1) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /**
  * Test whether the LockPoints height and time are still valid on the current chain
@@ -251,21 +252,21 @@ class CScriptCheck
 {
 private:
     CTxOut m_tx_out;
-    const CTransaction *ptxTo;
+    const CTransaction* ptxTo;
     unsigned int nIn;
     unsigned int nFlags;
     bool cacheStore;
     ScriptError error;
-    PrecomputedTransactionData *txdata;
+    PrecomputedTransactionData* txdata;
 
 public:
-    CScriptCheck(): ptxTo(nullptr), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
-    CScriptCheck(const CTxOut& outIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* txdataIn) :
-        m_tx_out(outIn), ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(txdataIn) { }
+    CScriptCheck() : ptxTo(nullptr), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
+    CScriptCheck(const CTxOut& outIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* txdataIn) : m_tx_out(outIn), ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(txdataIn) {}
 
     bool operator()();
 
-    void swap(CScriptCheck &check) {
+    void swap(CScriptCheck& check)
+    {
         std::swap(ptxTo, check.ptxTo);
         std::swap(m_tx_out, check.m_tx_out);
         std::swap(nIn, check.nIn);
@@ -306,7 +307,8 @@ void UpdateUncommittedBlockStructures(CBlock& block, const CBlockIndex* pindexPr
 std::vector<unsigned char> GenerateCoinbaseCommitment(CBlock& block, const CBlockIndex* pindexPrev, const Consensus::Params& consensusParams);
 
 /** RAII wrapper for VerifyDB: Verify consistency of the block and coin databases */
-class CVerifyDB {
+class CVerifyDB
+{
 public:
     CVerifyDB();
     ~CVerifyDB();
@@ -318,8 +320,7 @@ public:
         int nCheckDepth) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 };
 
-enum DisconnectResult
-{
+enum DisconnectResult {
     DISCONNECT_OK,      // All good.
     DISCONNECT_UNCLEAN, // Rolled back, but UTXO set was inconsistent with block.
     DISCONNECT_FAILED   // Something else went wrong.
@@ -335,9 +336,8 @@ enum class FlushStateMode {
     ALWAYS
 };
 
-struct CBlockIndexWorkComparator
-{
-    bool operator()(const CBlockIndex *pa, const CBlockIndex *pb) const;
+struct CBlockIndexWorkComparator {
+    bool operator()(const CBlockIndex* pa, const CBlockIndex* pb) const;
 };
 
 /**
@@ -450,7 +450,8 @@ public:
      */
     int GetSpendHeight(const CCoinsViewCache& inputs) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
-    ~BlockManager() {
+    ~BlockManager()
+    {
         Unload();
     }
 };
@@ -464,8 +465,8 @@ public:
  * ultimately falling back on cache misses to the canonical store of UTXOs on
  * disk, `m_dbview`.
  */
-class CoinsViews {
-
+class CoinsViews
+{
 public:
     //! The lowest level of the CoinsViews cache hierarchy sits in a leveldb database on disk.
     //! All unspent coins reside in this store.
@@ -490,8 +491,7 @@ public:
     void InitCache() EXCLUSIVE_LOCKS_REQUIRED(::cs_main);
 };
 
-enum class CoinsCacheSizeState
-{
+enum class CoinsCacheSizeState {
     //! The coins cache is in immediate need of a flush.
     CRITICAL = 2,
     //! The cache is at >= 90% capacity.
@@ -573,7 +573,8 @@ public:
 
     //! @returns whether or not the CoinsViews object has been fully initialized and we can
     //!          safely flush this object to disk.
-    bool CanFlushToDisk() const EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+    bool CanFlushToDisk() const EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+    {
         return m_coins_views && m_coins_views->m_cacheview;
     }
 
@@ -645,7 +646,7 @@ public:
      */
     bool FlushStateToDisk(
         const CChainParams& chainparams,
-        BlockValidationState &state,
+        BlockValidationState& state,
         FlushStateMode mode,
         int nManualPruneHeight = 0);
 
@@ -742,7 +743,7 @@ private:
     bool ActivateBestChainStep(BlockValidationState& state, const CChainParams& chainparams, CBlockIndex* pindexMostWork, const std::shared_ptr<const CBlock>& pblock, bool& fInvalidFound, ConnectTrace& connectTrace) EXCLUSIVE_LOCKS_REQUIRED(cs_main, m_mempool.cs);
     bool ConnectTip(BlockValidationState& state, const CChainParams& chainparams, CBlockIndex* pindexNew, const std::shared_ptr<const CBlock>& pblock, ConnectTrace& connectTrace, DisconnectedBlockTransactions& disconnectpool) EXCLUSIVE_LOCKS_REQUIRED(cs_main, m_mempool.cs);
 
-    void InvalidBlockFound(CBlockIndex *pindex, const BlockValidationState &state) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    void InvalidBlockFound(CBlockIndex* pindex, const BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     CBlockIndex* FindMostWorkChain() EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     void ReceivedBlockTransactions(const CBlock& block, CBlockIndex* pindexNew, const FlatFilePos& pos, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
@@ -829,7 +830,7 @@ private:
     //! This is especially important when, e.g., calling ActivateBestChain()
     //! on all chainstates because we are not able to hold ::cs_main going into
     //! that call.
-    CChainState* m_active_chainstate GUARDED_BY(::cs_main) {nullptr};
+    CChainState* m_active_chainstate GUARDED_BY(::cs_main){nullptr};
 
     //! If true, the assumed-valid chainstate has been fully validated
     //! by the background validation chainstate.

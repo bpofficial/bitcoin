@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./src/qt/bitcoin-qt -datadir=$HOME/.tng/srv1 -addnode=0.0.0.0:8962 -port=9333 -rpcport=9332 -debug=rpc -dns=0 -dnsseed=0 -rpcuser=rpc -rpcpassword=pass -reindex -server -rpcallowip=127.0.0.1 -maxtipage=40000000000

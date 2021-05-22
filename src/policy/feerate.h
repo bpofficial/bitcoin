@@ -11,7 +11,7 @@
 
 #include <string>
 
-const std::string CURRENCY_UNIT = "BTC"; // One formatted unit
+const std::string CURRENCY_UNIT = "TNG"; // One formatted unit
 const std::string CURRENCY_ATOM = "sat"; // One indivisible minimum value unit
 
 /* Used to determine type of fee estimation requested */
@@ -33,9 +33,10 @@ private:
 
 public:
     /** Fee rate of 0 satoshis per kB */
-    CFeeRate() : nSatoshisPerK(0) { }
-    template<typename I>
-    explicit CFeeRate(const I _nSatoshisPerK): nSatoshisPerK(_nSatoshisPerK) {
+    CFeeRate() : nSatoshisPerK(0) {}
+    template <typename I>
+    explicit CFeeRate(const I _nSatoshisPerK) : nSatoshisPerK(_nSatoshisPerK)
+    {
         // We've previously had bugs creep in from silent double->int conversion...
         static_assert(std::is_integral<I>::value, "CFeeRate should be used without floats");
     }
@@ -63,7 +64,11 @@ public:
     friend bool operator<=(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK <= b.nSatoshisPerK; }
     friend bool operator>=(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK >= b.nSatoshisPerK; }
     friend bool operator!=(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK != b.nSatoshisPerK; }
-    CFeeRate& operator+=(const CFeeRate& a) { nSatoshisPerK += a.nSatoshisPerK; return *this; }
+    CFeeRate& operator+=(const CFeeRate& a)
+    {
+        nSatoshisPerK += a.nSatoshisPerK;
+        return *this;
+    }
     std::string ToString(const FeeEstimateMode& fee_estimate_mode = FeeEstimateMode::BTC_KVB) const;
 
     SERIALIZE_METHODS(CFeeRate, obj) { READWRITE(obj.nSatoshisPerK); }
