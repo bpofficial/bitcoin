@@ -153,7 +153,7 @@ public:
 
         checkpointData = {
             {
-                {48, uint256("0x00000000f02769dc852bdab02a514e933123f8f98df0c8b92ea3946be08769d2")},
+                {48, uint256S("0x00000000f02769dc852bdab02a514e933123f8f98df0c8b92ea3946be08769d2")},
             }};
 
         m_assumeutxo_data = MapAssumeutxo{
