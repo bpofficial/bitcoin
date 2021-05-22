@@ -1,0 +1,93 @@
+#!/sbin/openrc-run
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/tangerine/.tangerine" ]; then
+	TANGERINED_DEFAULT_DATADIR="/var/lib/tangerine/.tangerine"
+else
+	TANGERINED_DEFAULT_DATADIR="/var/lib/tangerined"
+fi
+
+TANGERINED_CONFIGFILE=${TANGERINED_CONFIGFILE:-/etc/tangerine/tangerine.conf}
+TANGERINED_PIDDIR=${TANGERINED_PIDDIR:-/var/run/tangerined}
+TANGERINED_PIDFILE=${TANGERINED_PIDFILE:-${TANGERINED_PIDDIR}/tangerined.pid}
+TANGERINED_DATADIR=${TANGERINED_DATADIR:-${TANGERINED_DEFAULT_DATADIR}}
+TANGERINED_USER=${TANGERINED_USER:-${TANGERINE_USER:-tangerine}}
+TANGERINED_GROUP=${TANGERINED_GROUP:-tangerine}
+TANGERINED_BIN=${TANGERINED_BIN:-/usr/bin/tangerined}
+TANGERINED_NICE=${TANGERINED_NICE:-${NICELEVEL:-0}}
+TANGERINED_OPTS="${TANGERINED_OPTS:-${TANGERINE_OPTS}}"
+
+name="Tangerine Core Daemon"
+description="Tangerine cryptocurrency P2P network daemon"
+
+command="/usr/bin/tangerined"
+command_args="-pid=\"${TANGERINED_PIDFILE}\" \
+		-conf=\"${TANGERINED_CONFIGFILE}\" \
+		-datadir=\"${TANGERINED_DATADIR}\" \
+		-daemon \
+		${TANGERINED_OPTS}"
+
+required_files="${TANGERINED_CONFIGFILE}"
+start_stop_daemon_args="-u ${TANGERINED_USER} \
+			-N ${TANGERINED_NICE} -w 2000"
+pidfile="${TANGERINED_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${TANGERINED_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${TANGERINED_USER}:${TANGERINED_GROUP}" \
+	"${TANGERINED_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${TANGERINED_USER}:${TANGERINED_GROUP}" \
+	"${TANGERINED_PIDDIR}"
+
+	checkpath -f \
+	-o "${TANGERINED_USER}:${TANGERINED_GROUP}" \
+	-m 0660 \
+	"${TANGERINED_CONFIGFILE}"
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if grep -qs '^rpcuser=' "${TANGERINED_CONFIGFILE}" && \
+		! grep -qs '^rpcpassword=' "${TANGERINED_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run tangerined."
+		eerror "The setting must appear in ${TANGERINED_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Tangerine Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

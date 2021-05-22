@@ -1,0 +1,33 @@
+# /etc/conf.d/tangerined: config file for /etc/init.d/tangerined
+
+# Config file location
+#TANGERINED_CONFIGFILE="/etc/tangerine/tangerine.conf"
+
+# What directory to write pidfile to?  (created and owned by $TANGERINED_USER)
+#TANGERINED_PIDDIR="/var/run/tangerined"
+
+# What filename to give the pidfile
+#TANGERINED_PIDFILE="${TANGERINED_PIDDIR}/tangerined.pid"
+
+# Where to write tangerined data (be mindful that the blockchain is large)
+#TANGERINED_DATADIR="/var/lib/tangerined"
+
+# User and group to own tangerined process
+#TANGERINED_USER="tangerine"
+#TANGERINED_GROUP="tangerine"
+
+# Path to tangerined executable
+#TANGERINED_BIN="/usr/bin/tangerined"
+
+# Nice value to run tangerined under
+#TANGERINED_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#TANGERINED_OPTS=""
+
+# The timeout in seconds OpenRC will wait for tangerined to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+TANGERINED_SIGTERM_TIMEOUT=600
