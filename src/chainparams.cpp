@@ -111,8 +111,8 @@ public:
         pchMessageStart[3] = 0x4a;
         nDefaultPort = 5113;
         nPruneAfterHeight = 100000;
-        // m_assumed_blockchain_size = 350;
-        // m_assumed_chain_state_size = 6;
+        m_assumed_blockchain_size = 350;
+        m_assumed_chain_state_size = 6;
 
         genesis = CreateGenesisBlock(1621503506, 2441070730, 0x1d00ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -152,21 +152,19 @@ public:
         m_is_mockable_chain = false;
 
         checkpointData = {
-            // {
-            //     {0, uint256("0x001")},
-            // }
-        };
+            {
+                {48, uint256("00000000f02769dc852bdab02a514e933123f8f98df0c8b92ea3946be08769d2")},
+            }};
 
         m_assumeutxo_data = MapAssumeutxo{
             // TODO to be specified in a future patch.
         };
 
         chainTxData = ChainTxData{
-            0, 0, 0
-            // // Data from RPC: getchaintxstats 4096 0000000000000000000b9d2ec5a352ecba0592946514a92f14319dc2b367fc72
-            // /* nTime    */ 1603995752,
-            // /* nTxCount */ 582083445,
-            // /* dTxRate  */ 3.508976121410527,
+            // Data from RPC: getchaintxstats 4096 0000000000000000000b9d2ec5a352ecba0592946514a92f14319dc2b367fc72
+            /* nTime    */ 1621696083,
+            /* nTxCount */ 49,
+            /* dTxRate  */ 0.004854368932038835,
         };
     }
 };
